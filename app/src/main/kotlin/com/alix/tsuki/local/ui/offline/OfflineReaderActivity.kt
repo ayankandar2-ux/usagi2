@@ -8,6 +8,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import com.alix.tsuki.R
@@ -39,7 +40,10 @@ class OfflineReaderActivity : BaseActivity<ActivityOfflineReaderBinding>() {
 		setDisplayHomeAsUp(isEnabled = true, showUpAsClose = false)
 		title = getString(R.string.offline_reader)
 
-		val adapter = OfflineFolderAdapter { manga -> viewModel.onLibraryItemClick(manga) }
+		val adapter = OfflineFolderAdapter(
+			onItemClick = { manga -> viewModel.onLibraryItemClick(manga) },
+			onItemLongClick = { manga -> viewModel.onLibraryItemLongClick(manga) },
+		)
 		viewBinding.recyclerView.adapter = adapter
 
 		viewBinding.fabSelectFolder.setOnClickListener {
@@ -55,6 +59,14 @@ class OfflineReaderActivity : BaseActivity<ActivityOfflineReaderBinding>() {
 		viewModel.isLoading.observe(this) { viewBinding.progressBar.isVisible = it }
 		viewModel.onMangaReady.observeEvent(this) { manga ->
 			router.openDetails(manga)
+		}
+		viewModel.onConfirmRemove.observeEvent(this) { manga ->
+			MaterialAlertDialogBuilder(this)
+				.setTitle(manga.title)
+				.setMessage(R.string.offline_reader_remove_folder_confirm)
+				.setPositiveButton(R.string.remove) { _, _ -> viewModel.onRemoveFolderConfirmed(manga) }
+				.setNegativeButton(android.R.string.cancel, null)
+				.show()
 		}
 		viewModel.onError.observeEvent(
 			this,

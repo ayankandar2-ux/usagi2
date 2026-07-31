@@ -1,6 +1,7 @@
 package com.alix.tsuki.local.ui.offline
 
 import android.net.Uri
+import androidx.core.net.toUri
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -9,6 +10,7 @@ import com.alix.tsuki.core.ui.BaseViewModel
 import com.alix.tsuki.core.util.ext.MutableEventFlow
 import com.alix.tsuki.core.util.ext.call
 import com.alix.tsuki.local.data.LocalStorageManager
+import com.alix.tsuki.local.data.pdf.parseOfflineFolderUri
 import com.alix.tsuki.local.domain.offline.OfflineFolderMangaBuilder
 import tsuki.model.Manga
 import javax.inject.Inject
@@ -29,6 +31,9 @@ class OfflineReaderViewModel @Inject constructor(
 	private val _onMangaReady = MutableEventFlow<Manga>()
 	val onMangaReady get() = _onMangaReady
 
+	private val _onConfirmRemove = MutableEventFlow<Manga>()
+	val onConfirmRemove get() = _onConfirmRemove
+
 	init {
 		reloadLibrary()
 	}
@@ -46,6 +51,19 @@ class OfflineReaderViewModel @Inject constructor(
 
 	fun onLibraryItemClick(manga: Manga) {
 		_onMangaReady.call(manga)
+	}
+
+	/** Long-press: ask the Activity to confirm before actually removing anything. */
+	fun onLibraryItemLongClick(manga: Manga) {
+		_onConfirmRemove.call(manga)
+	}
+
+	fun onRemoveFolderConfirmed(manga: Manga) {
+		val folderUri = parseOfflineFolderUri(manga.url.toUri()) ?: return
+		launchLoadingJob(Dispatchers.Default) {
+			libraryPrefs.removeFolder(folderUri)
+			reloadLibraryInternal()
+		}
 	}
 
 	private fun reloadLibrary() {

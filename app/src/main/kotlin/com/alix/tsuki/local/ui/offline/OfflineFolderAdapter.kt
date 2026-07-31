@@ -10,6 +10,7 @@ import tsuki.model.Manga
 
 class OfflineFolderAdapter(
 	private val onItemClick: (Manga) -> Unit,
+	private val onItemLongClick: (Manga) -> Unit,
 ) : ListAdapter<Manga, OfflineFolderAdapter.ViewHolder>(DiffCallback) {
 
 	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -28,6 +29,15 @@ class OfflineFolderAdapter(
 				val position = bindingAdapterPosition
 				if (position != RecyclerView.NO_POSITION) {
 					onItemClick(getItem(position))
+				}
+			}
+			binding.root.setOnLongClickListener {
+				val position = bindingAdapterPosition
+				if (position != RecyclerView.NO_POSITION) {
+					onItemLongClick(getItem(position))
+					true
+				} else {
+					false
 				}
 			}
 		}
