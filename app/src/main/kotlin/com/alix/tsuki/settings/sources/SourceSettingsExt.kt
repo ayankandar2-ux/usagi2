@@ -1,0 +1,166 @@
+package com.alix.tsuki.settings.sources
+
+import android.view.inputmethod.EditorInfo
+import eu.kanade.tachiyomi.source.ConfigurableSource
+import eu.kanade.tachiyomi.source.preferenceKey
+import eu.kanade.tachiyomi.source.online.HttpSource
+import androidx.preference.EditTextPreference
+import androidx.preference.ListPreference
+import androidx.preference.Preference
+import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.SwitchPreferenceCompat
+import com.alix.tsuki.R
+import com.alix.tsuki.core.parser.EmptyMangaRepository
+import com.alix.tsuki.core.parser.MangaRepository
+import com.alix.tsuki.core.parser.MangaParserRepository
+import com.alix.tsuki.core.parser.tachiyomi.ExternalMangaRepository
+import com.alix.tsuki.core.prefs.SourceSettings
+import tsuki.config.ConfigKey
+import tsuki.network.UserAgents
+import tsuki.util.mapToArray
+import com.alix.tsuki.settings.utils.AutoCompleteTextViewPreference
+import com.alix.tsuki.settings.utils.EditTextBindListener
+import com.alix.tsuki.settings.utils.EditTextDefaultSummaryProvider
+import com.alix.tsuki.settings.utils.validation.DomainValidator
+import com.alix.tsuki.settings.utils.validation.HeaderValidator
+
+fun PreferenceFragmentCompat.addPreferencesFromRepository(repository: MangaRepository) = when (repository) {
+	is MangaParserRepository -> addPreferencesFromParserRepository(repository)
+	is ExternalMangaRepository -> addPreferences(repository)
+	is EmptyMangaRepository -> addPreferencesFromEmptyRepository()
+	else -> Unit
+}
+
+private fun PreferenceFragmentCompat.addPreferences(repository: ExternalMangaRepository) {
+	val configurableSource = repository.external as? ConfigurableSource
+	if (configurableSource != null) {
+		preferenceManager.sharedPreferencesName = configurableSource.preferenceKey()
+	}
+	// Let extension add its preferences first
+	configurableSource?.setupPreferenceScreen(preferenceScreen)
+	// Remove extension's domain preference if it added one — Usagi replaces it
+	preferenceScreen.findPreference<Preference>(SourceSettings.KEY_DOMAIN)?.let {
+		preferenceScreen.removePreference(it)
+	}
+	// Add Usagi's EditTextPreference last so key lookup always returns it
+	addDomainPreferences(repository)
+}
+
+private fun PreferenceFragmentCompat.addDomainPreferences(repository: ExternalMangaRepository) {
+	val httpSource = repository.external as? HttpSource ?: return
+	val baseDomain = httpSource.baseUrl.removePrefix("https://").removePrefix("http://").substringBefore('/')
+	EditTextPreference(preferenceScreen.context).apply {
+		key = SourceSettings.KEY_DOMAIN
+		order = 5
+		isIconSpaceReserved = false
+		summaryProvider = EditTextDefaultSummaryProvider(baseDomain)
+		setOnBindEditTextListener(
+			EditTextBindListener(
+				inputType = EditorInfo.TYPE_CLASS_TEXT or EditorInfo.TYPE_TEXT_VARIATION_URI,
+				hint = baseDomain,
+				validator = DomainValidator(),
+			),
+		)
+		setTitle(R.string.domain)
+		setDialogTitle(R.string.domain)
+		preferenceScreen.addPreference(this)
+	}
+}
+
+private fun PreferenceFragmentCompat.addPreferencesFromParserRepository(repository: MangaParserRepository) {
+	addPreferencesFromResource(R.xml.pref_source_parser)
+	val configKeys = repository.getConfigKeys()
+	val screen = preferenceScreen
+	for (key in configKeys) {
+		val preference: Preference = when (key) {
+			is ConfigKey.Domain -> {
+				val presetValues = key.presetValues
+				if (presetValues.size <= 1) {
+					EditTextPreference(screen.context)
+				} else {
+					AutoCompleteTextViewPreference(screen.context).apply {
+						entries = presetValues.toStringArray()
+					}
+				}.apply {
+					summaryProvider = EditTextDefaultSummaryProvider(key.defaultValue)
+					setOnBindEditTextListener(
+						EditTextBindListener(
+							inputType = EditorInfo.TYPE_CLASS_TEXT or EditorInfo.TYPE_TEXT_VARIATION_URI,
+							hint = key.defaultValue,
+							validator = DomainValidator(),
+						),
+					)
+					setTitle(R.string.domain)
+					setDialogTitle(R.string.domain)
+				}
+			}
+
+			is ConfigKey.UserAgent -> {
+				AutoCompleteTextViewPreference(screen.context).apply {
+					entries = arrayOf(
+						UserAgents.FIREFOX_MOBILE,
+						UserAgents.CHROME_MOBILE,
+						UserAgents.FIREFOX_DESKTOP,
+						UserAgents.CHROME_DESKTOP,
+					)
+					summaryProvider = EditTextDefaultSummaryProvider(key.defaultValue)
+					setOnBindEditTextListener(
+						EditTextBindListener(
+							inputType = EditorInfo.TYPE_CLASS_TEXT,
+							hint = key.defaultValue,
+							validator = HeaderValidator(),
+						),
+					)
+					setTitle(R.string.user_agent)
+					setDialogTitle(R.string.user_agent)
+				}
+			}
+
+			is ConfigKey.ShowSuspiciousContent -> {
+				SwitchPreferenceCompat(screen.context).apply {
+					setDefaultValue(key.defaultValue)
+					setTitle(R.string.show_suspicious_content)
+				}
+			}
+
+			is ConfigKey.SplitByTranslations -> {
+				SwitchPreferenceCompat(screen.context).apply {
+					setDefaultValue(key.defaultValue)
+					setTitle(R.string.split_by_translations)
+					setSummary(R.string.split_by_translations_summary)
+				}
+			}
+
+			is ConfigKey.PreferredImageServer -> {
+				ListPreference(screen.context).apply {
+					entries = key.presetValues.values.mapToArray {
+						it ?: context.getString(R.string.automatic)
+					}
+					entryValues = key.presetValues.keys.mapToArray { it.orEmpty() }
+					setDefaultValue(key.defaultValue.orEmpty())
+					setTitle(R.string.image_server)
+					setDialogTitle(R.string.image_server)
+					summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
+				}
+			}
+		}
+		preference.isIconSpaceReserved = false
+		preference.key = key.key
+		preference.order = 10
+		screen.addPreference(preference)
+	}
+}
+
+private fun PreferenceFragmentCompat.addPreferencesFromEmptyRepository() {
+	val preference = Preference(requireContext())
+	preference.setIcon(R.drawable.ic_alert_outline)
+	preference.isPersistent = false
+	preference.isSelectable = false
+	preference.order = 200
+	preference.setSummary(R.string.unsupported_source)
+	preferenceScreen.addPreference(preference)
+}
+
+private fun Array<out String?>.toStringArray(): Array<String> {
+	return Array(size) { i -> this[i].orEmpty() }
+}

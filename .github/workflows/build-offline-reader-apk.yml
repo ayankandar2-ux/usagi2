@@ -53,7 +53,7 @@ jobs:
         if: steps.build.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
-          name: usagi-offline-reader-debug-apk
+          name: tsuki-reader-debug-apk
           path: app/build/outputs/apk/debug/*.apk
           retention-days: 14
 

@@ -11,7 +11,7 @@
 	app:shapeAppearance="?shapeAppearanceCornerExtraLarge"
 	tools:layout_height="@dimen/recommendation_item_height">
 
-	<org.draken.usagi.image.ui.CoverImageView
+	<com.alix.tsuki.image.ui.CoverImageView
 		android:id="@+id/imageView_cover"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"

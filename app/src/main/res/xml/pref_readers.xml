@@ -29,7 +29,7 @@
 		android:summary="@string/webtoon_zoom_summary"
 		android:title="@string/webtoon_zoom" />
 
-	<org.draken.usagi.settings.utils.SliderPreference
+	<com.alix.tsuki.settings.utils.SliderPreference
 		android:dependency="webtoon_zoom"
 		android:key="webtoon_zoom_out"
 		android:stepSize="10"
@@ -83,7 +83,7 @@
 		android:title="@string/crop_pages" />
 
 	<PreferenceScreen
-		android:fragment="org.draken.usagi.settings.reader.ReaderPreviewSettingsFragment"
+		android:fragment="com.alix.tsuki.settings.reader.ReaderPreviewSettingsFragment"
 		android:key="reader_appearance_nav"
 		android:summary="@string/reader_appearance_summary"
 		android:title="@string/reader_appearance"

@@ -9,7 +9,7 @@
 		app:allowDividerAbove="false"
 		app:allowDividerBelow="false">
 
-		<org.draken.usagi.settings.reader.ReaderPreviewSettingsPreference
+		<com.alix.tsuki.settings.reader.ReaderPreviewSettingsPreference
 			android:key="reader_appearance_preview"
 			android:persistent="false"
 			android:selectable="false" />
@@ -75,7 +75,7 @@
 			android:key="reader_controls"
 			android:title="@string/reader_controls_in_bottom_bar" />
 
-		<org.draken.usagi.settings.utils.SliderPreference
+		<com.alix.tsuki.settings.utils.SliderPreference
 			android:defaultValue="50"
 			android:key="reader_top_bar_opacity"
 			android:stepSize="5"
@@ -83,7 +83,7 @@
 			android:valueFrom="50"
 			android:valueTo="100" />
 
-		<org.draken.usagi.settings.utils.SliderPreference
+		<com.alix.tsuki.settings.utils.SliderPreference
 			android:defaultValue="50"
 			android:key="reader_bottom_bar_opacity"
 			android:stepSize="5"

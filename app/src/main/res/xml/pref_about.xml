@@ -28,7 +28,7 @@
 		android:title="@string/updates_remind" />
 
 	<Preference
-		android:fragment="org.draken.usagi.settings.about.changelog.ChangelogFragment"
+		android:fragment="com.alix.tsuki.settings.about.changelog.ChangelogFragment"
 		android:key="changelog"
 		android:persistent="false"
 		android:summary="@string/changelog_summary"

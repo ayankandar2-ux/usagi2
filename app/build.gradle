@@ -13,16 +13,16 @@ plugins {
 android {
 	compileSdkVersion 'android-37.0'
 	buildToolsVersion = '37.0.0'
-	namespace = 'org.draken.usagi'
+	namespace = 'com.alix.tsuki'
 
 	defaultConfig {
-		applicationId 'org.draken.usagi'
+		applicationId 'com.alix.tsuki'
 		minSdk = 21
 		targetSdk = 37
 		versionCode = 16
 		versionName = '0.0.32-beta2'
 		generatedDensities = []
-		testInstrumentationRunner 'org.draken.usagi.HiltTestRunner'
+		testInstrumentationRunner 'com.alix.tsuki.HiltTestRunner'
 		ksp {
 			arg('room.generateKotlin', 'true')
 		}

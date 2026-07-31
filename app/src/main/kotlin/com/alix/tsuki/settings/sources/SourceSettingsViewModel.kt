@@ -1,0 +1,127 @@
+package com.alix.tsuki.settings.sources
+
+import android.content.SharedPreferences
+import androidx.lifecycle.SavedStateHandle
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import okhttp3.HttpUrl
+import com.alix.tsuki.R
+import com.alix.tsuki.core.model.MangaSource
+import com.alix.tsuki.core.nav.AppRouter
+import com.alix.tsuki.core.network.cookies.MutableCookieJar
+import com.alix.tsuki.core.parser.CachingMangaRepository
+import com.alix.tsuki.core.parser.MangaRepository
+import com.alix.tsuki.core.parser.MangaParserRepository
+import com.alix.tsuki.core.parser.tachiyomi.ExternalMangaRepository
+import com.alix.tsuki.core.prefs.SourceSettings
+import com.alix.tsuki.core.ui.BaseViewModel
+import com.alix.tsuki.core.ui.util.ReversibleAction
+import com.alix.tsuki.core.util.ext.MutableEventFlow
+import com.alix.tsuki.core.util.ext.call
+import com.alix.tsuki.explore.data.MangaSourcesRepository
+import tsuki.MangaParserAuthProvider
+import tsuki.exception.AuthRequiredException
+import javax.inject.Inject
+
+@HiltViewModel
+class SourceSettingsViewModel @Inject constructor(
+	savedStateHandle: SavedStateHandle,
+	mangaRepositoryFactory: MangaRepository.Factory,
+	private val cookieJar: MutableCookieJar,
+	private val mangaSourcesRepository: MangaSourcesRepository,
+) : BaseViewModel(), SharedPreferences.OnSharedPreferenceChangeListener {
+
+	val source = MangaSource(savedStateHandle.get<String>(AppRouter.KEY_SOURCE))
+	val repository = mangaRepositoryFactory.create(source)
+
+	val onActionDone = MutableEventFlow<ReversibleAction>()
+	val username = MutableStateFlow<String?>(null)
+	val isAuthorized = MutableStateFlow<Boolean?>(null)
+	val browserUrl = MutableStateFlow<String?>(null)
+	val isEnabled = mangaSourcesRepository.observeIsEnabled(source)
+	private var usernameLoadJob: Job? = null
+
+	init {
+		when (repository) {
+			is MangaParserRepository -> {
+				browserUrl.value = "https://${repository.domain}"
+				repository.getConfig().subscribe(this)
+				loadUsername(repository.getAuthProvider())
+			}
+
+			is ExternalMangaRepository -> {
+				browserUrl.value = repository.getBrowserUrl()
+				repository.getSettingsPreferences().registerOnSharedPreferenceChangeListener(this)
+			}
+		}
+	}
+
+	override fun onCleared() {
+		when (repository) {
+			is MangaParserRepository -> {
+				repository.getConfig().unsubscribe(this)
+			}
+
+			is ExternalMangaRepository -> {
+				repository.getSettingsPreferences().unregisterOnSharedPreferenceChangeListener(this)
+			}
+		}
+		super.onCleared()
+	}
+
+	override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+		if (repository is CachingMangaRepository) {
+			if (key != SourceSettings.KEY_SLOWDOWN && key != SourceSettings.KEY_SORT_ORDER) {
+				repository.invalidateCache()
+			}
+		}
+		if (repository is MangaParserRepository) {
+			if (key == SourceSettings.KEY_DOMAIN) {
+				browserUrl.value = "https://${repository.domain}"
+			}
+		}
+		if (repository is ExternalMangaRepository && key == SourceSettings.KEY_DOMAIN) {
+			repository.refreshDomainOverride()
+			browserUrl.value = repository.getBrowserUrl()
+		}
+	}
+
+	fun onResume() {
+		if (usernameLoadJob?.isActive != true && repository is MangaParserRepository) {
+			loadUsername(repository.getAuthProvider())
+		}
+	}
+
+	fun clearCookies() {
+		if (repository !is MangaParserRepository) return
+		launchLoadingJob(Dispatchers.Default) {
+			val url = HttpUrl.Builder()
+				.scheme("https")
+				.host(repository.domain)
+				.build()
+			cookieJar.removeCookies(url, null)
+			onActionDone.call(ReversibleAction(R.string.cookies_cleared, null))
+			loadUsername(repository.getAuthProvider())
+		}
+	}
+
+	fun setEnabled(value: Boolean) {
+		launchJob(Dispatchers.Default) {
+			mangaSourcesRepository.setSourcesEnabled(setOf(source), value)
+		}
+	}
+
+	private fun loadUsername(authProvider: MangaParserAuthProvider?) {
+		launchLoadingJob(Dispatchers.Default) {
+			try {
+				username.value = null
+				isAuthorized.value = null
+				isAuthorized.value = authProvider?.isAuthorized()
+				username.value = authProvider?.getUsername()
+			} catch (_: AuthRequiredException) {
+			}
+		}
+	}
+}

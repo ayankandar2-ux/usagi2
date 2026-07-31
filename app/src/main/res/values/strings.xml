@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name" translatable="false">Usagi</string>
+    <string name="app_name" translatable="false">Tsuki Reader</string>
     <string name="local_storage">Local storage</string>
     <string name="favourites">Favorites</string>
     <string name="history">History</string>
@@ -135,7 +135,7 @@
     <string name="enter_password">Enter password</string>
     <string name="wrong_password">Wrong password</string>
     <string name="protect_application">Protect the app</string>
-    <string name="protect_application_summary">Ask for password when starting Usagi</string>
+    <string name="protect_application_summary">Ask for password when starting Tsuki Reader</string>
     <string name="repeat_password">Repeat the password</string>
     <string name="passwords_mismatch">Mismatching passwords</string>
     <string name="about">About</string>
@@ -336,7 +336,7 @@
     <string name="import_completed_hint">You can delete the original file from storage to save space</string>
     <string name="import_will_start_soon">Import will start soon</string>
     <string name="feed">Feed</string>
-    <string name="manga_error_description_pattern">Error details:&lt;br&gt;&lt;tt&gt;%1$s&lt;/tt&gt;&lt;br&gt;&lt;br&gt;1. Try to &lt;a href="%2$s"&gt;open manga in a web browser&lt;/a&gt; to ensure it is available on its source&lt;br&gt;2. Make sure you are using the &lt;a href="kotatsu://about"&gt;latest version of Usagi&lt;/a&gt;&lt;br&gt;3. If it is available, send an error report to the developers.</string>
+    <string name="manga_error_description_pattern">Error details:&lt;br&gt;&lt;tt&gt;%1$s&lt;/tt&gt;&lt;br&gt;&lt;br&gt;1. Try to &lt;a href="%2$s"&gt;open manga in a web browser&lt;/a&gt; to ensure it is available on its source&lt;br&gt;2. Make sure you are using the &lt;a href="kotatsu://about"&gt;latest version of Tsuki Reader&lt;/a&gt;&lt;br&gt;3. If it is available, send an error report to the developers.</string>
     <string name="history_shortcuts">Show recent manga shortcuts</string>
     <string name="history_shortcuts_summary">Make recent manga available by long pressing on application icon</string>
     <string name="reader_control_ltr_summary">Do not adjust the page switching direction to the reader mode, e. g. pressing the right key always switches to the next page. This option affects only hardware input devices</string>
@@ -557,7 +557,7 @@
     <string name="error_filter_states_genre_not_supported">Filtering by both genres and states is not supported by this source</string>
     <string name="genres_search_hint">Start typing the genre name</string>
     <string name="disable_battery_optimization_summary_downloads">Might help with getting the download started if you have any issues with it</string>
-    <string name="welcome_text">This is the beginning of Usagi, let\'s get acquainted. You can restore your old data using the quick options below. None of the content is currently available in Usagi, but you can customize the content you want to read in app settings later.</string>
+    <string name="welcome_text">This is the beginning of Tsuki Reader, let\'s get acquainted. You can restore your old data using the quick options below. None of the content is currently available in Tsuki Reader, but you can customize the content you want to read in app settings later.</string>
     <string name="sync_auth">Login to sync account</string>
     <string name="restore">Restore</string>
     <string name="backup_date_">Backup date: %s</string>
@@ -651,7 +651,7 @@
     <string name="show_pages_thumbs">Show pages thumbnails</string>
     <string name="show_pages_thumbs_summary">Enable the \"Pages\" tab on the details screen</string>
     <string name="error_no_data_received">No data was received from server</string>
-    <string name="unsupported_backup_message">Please select a proper Usagi backup file</string>
+    <string name="unsupported_backup_message">Please select a proper Tsuki Reader backup file</string>
     <string name="list_ellipsize_pattern" translatable="false">(+%d)</string>
     <!-- Short hours format pattern -->
     <string name="hours_short">%d h</string>
@@ -712,8 +712,8 @@
     <string name="chapters_read">Chapters read</string>
     <string name="chapters_left">Chapters left</string>
     <string name="external_source">External/plugin</string>
-    <string name="plugin_incompatible">Incompatible plugin or internal error. Make sure you are using the latest version of the plugin and Usagi</string>
-    <string name="plugin_incompatible_with_cause">Plugin error: %s\n Make sure you are using the latest version of the plugin and Usagi</string>
+    <string name="plugin_incompatible">Incompatible plugin or internal error. Make sure you are using the latest version of the plugin and Tsuki Reader</string>
+    <string name="plugin_incompatible_with_cause">Plugin error: %s\n Make sure you are using the latest version of the plugin and Tsuki Reader</string>
     <string name="connection_ok">Connection is OK</string>
     <string name="invalid_proxy_configuration">Invalid proxy configuration</string>
     <string name="show_quick_filters">Show quick filters</string>
@@ -847,10 +847,10 @@
     <string name="search_disabled_sources">Search through disabled sources</string>
     <string name="error_details">Error details</string>
     <string name="error_disclaimer_manga">Try to open manga in a web browser to ensure it is available on its source.</string>
-    <string name="error_disclaimer_app_outdated">It looks like your version of Usagi is out of date. Please install the latest version to get all available fixes.</string>
+    <string name="error_disclaimer_app_outdated">It looks like your version of Tsuki Reader is out of date. Please install the latest version to get all available fixes.</string>
     <string name="error_disclaimer_report">You can submit a bug report to the developers. This will help us investigate and fix the issue.</string>
     <string name="link_to_manga_on_s">Link to manga on %s</string>
-    <string name="link_to_manga_in_app">Link to manga in Usagi</string>
+    <string name="link_to_manga_in_app">Link to manga in Tsuki Reader</string>
     <string name="clear_browser_data">Clear browser data</string>
     <string name="clear_browser_data_summary">Clear browser data such as cache and cookies. Warning: Authorization in manga sources may become invalid</string>
     <string name="no_write_permission_to_file">Does not have permission to write a file</string>
@@ -902,7 +902,7 @@
     <string name="discord_token_hint">Paste your Discord Token here</string>
     <string name="discord_rpc_summary">Show your reading status on Discord</string>
     <string name="obtain">Obtain</string>
-    <string name="discord_rpc_description">Reading manga on Usagi - a manga reader app</string>
+    <string name="discord_rpc_description">Reading manga on Tsuki Reader - a manga reader app</string>
     <string name="reading_s">Reading %s</string>
     <string name="read_on_s">Read on %s</string>
     <string name="rpc_skip_nsfw_summary">Do not use RPC for adult content</string>
@@ -945,7 +945,7 @@
 	<string name="confirm_delete_plugin">Are you sure you want to delete %1$s?</string>
 	<string name="delete_plugin">Delete plugin</string>
 	<string name="import_from_github">Import from GitHub</string>
-	<string name="import_github_summary">You can enter a full GitHub URL or Username/Repository. Usagi will automatically find and install the plugin from the latest release.</string>
+	<string name="import_github_summary">You can enter a full GitHub URL or Username/Repository. Tsuki Reader will automatically find and install the plugin from the latest release.</string>
 	<string name="load_failed">Failed to load plugin</string>
 	<string name="load_from_storage">Import from local storage</string>
 	<string name="load_storage_summary">You can select a JAR file from local storage, that file will be recognized as a plugin.</string>
@@ -959,7 +959,7 @@
 	<string name="set_plugin_name">Set name for this plugin</string>
 	<string name="updates_remind">Notify about app updates</string>
 	<string name="updates_remind_summary">Show a dialog on app start when an update is available</string>
-	<string name="update_available_message">A new version of Usagi is available. Do you want to update it now?</string>
+	<string name="update_available_message">A new version of Tsuki Reader is available. Do you want to update it now?</string>
 	<string name="check_app_update">Automatically check for updates</string>
 	<string name="check_app_update_summary">Check for app updates automatically at startup</string>
 	<string name="auto_update_plugins">Auto update plugins</string>

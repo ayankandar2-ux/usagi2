@@ -1,0 +1,136 @@
+package com.alix.tsuki.core
+
+import android.app.Application
+import android.content.Context
+import android.os.Build
+import androidx.annotation.WorkerThread
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.hilt.work.HiltWorkerFactory
+import androidx.room.InvalidationTracker
+import androidx.work.Configuration
+import eu.kanade.tachiyomi.AppInfo
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.internal.platform.PlatformRegistry
+import org.conscrypt.Conscrypt
+import org.draken.tsukimix.core.parser.tachiyomi.model.TachiyomiMangaSource as External
+import com.alix.tsuki.BuildConfig
+import com.alix.tsuki.core.db.MangaDatabase
+import com.alix.tsuki.core.model.MangaSourceRegistry
+import com.alix.tsuki.core.os.AppValidator
+import com.alix.tsuki.core.model.PluginKeyResolver
+import com.alix.tsuki.core.parser.MangaDynamicRepository
+import com.alix.tsuki.filter.data.SavedFiltersRepository
+import com.alix.tsuki.core.prefs.AppSettings
+import com.alix.tsuki.core.ui.GlobalExceptionHandler
+import com.alix.tsuki.core.util.ext.processLifecycleScope
+import com.alix.tsuki.local.data.LocalStorageChanges
+import com.alix.tsuki.local.data.index.LocalMangaIndex
+import com.alix.tsuki.local.domain.model.LocalManga
+import com.alix.tsuki.settings.work.WorkScheduleManager
+import org.draken.tsukimix.core.parser.tachiyomi.TachiyomiExtensionManager as ExternalManager
+import java.security.Security
+import javax.inject.Inject
+import javax.inject.Provider
+
+open class BaseApp : Application(), Configuration.Provider {
+
+	@Inject
+	lateinit var databaseObserversProvider: Provider<Set<@JvmSuppressWildcards InvalidationTracker.Observer>>
+
+	@Inject
+	lateinit var activityLifecycleCallbacks: Set<@JvmSuppressWildcards ActivityLifecycleCallbacks>
+
+	@Inject
+	lateinit var database: Provider<MangaDatabase>
+
+	@Inject
+	lateinit var settings: AppSettings
+
+	@Inject
+	lateinit var workerFactory: HiltWorkerFactory
+
+	@Inject
+	lateinit var appValidator: AppValidator
+
+	@Inject
+	lateinit var workScheduleManager: WorkScheduleManager
+
+	@Inject
+	lateinit var savedFiltersRepository: SavedFiltersRepository
+
+	@Inject
+	lateinit var localMangaIndexProvider: Provider<LocalMangaIndex>
+
+	@Inject
+	lateinit var mangaDynamicRepository: MangaDynamicRepository
+
+	@Inject
+	lateinit var pluginKeyResolver: PluginKeyResolver
+
+	@Inject
+	lateinit var externalManager: ExternalManager
+
+	@Inject
+	@LocalStorageChanges
+	lateinit var localStorageChanges: MutableSharedFlow<LocalManga?>
+
+	override val workManagerConfiguration: Configuration
+		get() = Configuration.Builder()
+			.setWorkerFactory(workerFactory)
+			.build()
+
+	override fun onCreate() {
+		super.onCreate()
+		AppInfo.initialize(BuildConfig.VERSION_CODE, BuildConfig.VERSION_NAME)
+		PlatformRegistry.applicationContext = this // TODO replace with OkHttp.initialize
+		Thread.setDefaultUncaughtExceptionHandler(
+			GlobalExceptionHandler(this, settings, Thread.getDefaultUncaughtExceptionHandler())
+		)
+		AppCompatDelegate.setDefaultNightMode(settings.theme)
+		// TLS 1.3 support for Android < 10
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+			Security.insertProviderAt(Conscrypt.newProvider(), 1)
+		}
+		setupActivityLifecycleCallbacks()
+		processLifecycleScope.launch(Dispatchers.Default) {
+			setupDatabaseObservers()
+			localStorageChanges.collect(localMangaIndexProvider.get())
+		}
+		processLifecycleScope.launch(Dispatchers.Default) {
+			externalManager.sources.collect { wrapped ->
+				val exist = MangaSourceRegistry.sources.filterNot { it is External }
+				MangaSourceRegistry.publish(exist + wrapped)
+			}
+		}
+
+		processLifecycleScope.launch(Dispatchers.IO) {
+			mangaDynamicRepository.load(mangaDynamicRepository.getDir())
+			externalManager.ensureReady()
+			withContext(Dispatchers.Default) {
+				pluginKeyResolver.normalize(database.get(), savedFiltersRepository)
+			}
+		}
+		workScheduleManager.init()
+	}
+
+	override fun attachBaseContext(base: Context) {
+		super.attachBaseContext(base)
+	}
+
+	@WorkerThread
+	private fun setupDatabaseObservers() {
+		val tracker = database.get().invalidationTracker
+		databaseObserversProvider.get().forEach {
+			tracker.addObserver(it)
+		}
+	}
+
+	private fun setupActivityLifecycleCallbacks() {
+		activityLifecycleCallbacks.forEach {
+			registerActivityLifecycleCallbacks(it)
+		}
+	}
+}

@@ -27,7 +27,7 @@
         </a>
       </td>
       <td align="center">
-        <a href="https://f-droid.org/en/packages/org.draken.usagi/">
+        <a href="https://f-droid.org/en/packages/com.alix.tsuki/">
           <img src="./.github/assets/badge_fdroid.png" height="70" alt="Usagi on F-Droid">
         </a>
       </td>

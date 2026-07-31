@@ -16,7 +16,7 @@
 		android:nestedScrollingEnabled="false"
 		tools:listitem="@layout/item_recommendation_manga" />
 
-	<org.draken.usagi.core.ui.widgets.DotsIndicator
+	<com.alix.tsuki.core.ui.widgets.DotsIndicator
 		android:id="@+id/dots"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"

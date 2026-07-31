@@ -18,12 +18,12 @@
 -dontwarn com.google.re2j.**
 -dontwarn coil3.PlatformContext
 
--keep class org.draken.usagi.settings.NotificationSettingsLegacyFragment
--keep class org.draken.usagi.settings.about.changelog.ChangelogFragment
+-keep class com.alix.tsuki.settings.NotificationSettingsLegacyFragment
+-keep class com.alix.tsuki.settings.about.changelog.ChangelogFragment
 
--keep class org.draken.usagi.core.exceptions.* { *; }
--keep class org.draken.usagi.core.prefs.ScreenshotsPolicy { *; }
--keep class org.draken.usagi.backups.ui.periodical.PeriodicalBackupSettingsFragment { *; }
+-keep class com.alix.tsuki.core.exceptions.* { *; }
+-keep class com.alix.tsuki.core.prefs.ScreenshotsPolicy { *; }
+-keep class com.alix.tsuki.backups.ui.periodical.PeriodicalBackupSettingsFragment { *; }
 
 # General (for plugins / exts)
 -keep class androidx.collection.Scatter* { public protected *; }
