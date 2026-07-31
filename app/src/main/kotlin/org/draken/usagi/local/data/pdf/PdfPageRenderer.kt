@@ -11,9 +11,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import okio.source
+import org.draken.usagi.core.util.ext.MimeType
 import org.draken.usagi.core.util.ext.printStackTraceDebug
 import org.draken.usagi.local.data.LocalStorageCache
 import tsuki.util.runCatchingCancellable
+import java.io.ByteArrayOutputStream
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -104,7 +107,17 @@ class PdfPageRenderer @Inject constructor(
 			try {
 				bitmap.eraseColor(Color.WHITE)
 				page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
-				cache.set(cacheKey, bitmap)
+				// Deliberately not using cache.set(key, bitmap) here: that overload always
+				// encodes as lossless PNG at quality 100, which is slow on photographic/
+				// scanned content like manga pages. JPEG at 90 is both much faster to
+				// encode and produces a smaller file, with no visible quality loss for a
+				// manga page — scoped to PDF rendering only, the shared cache utility and
+				// every other caller of it are untouched.
+				val jpegBytes = ByteArrayOutputStream().use { out ->
+					bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
+					out.toByteArray()
+				}
+				cache.set(cacheKey, jpegBytes.inputStream().source(), MimeType("image/jpeg"))
 			} finally {
 				bitmap.recycle()
 			}
