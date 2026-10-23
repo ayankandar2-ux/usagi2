@@ -69,6 +69,10 @@ class AppUpdateRepository @Inject constructor(
 	}
 
 	suspend fun fetchUpdate(force: Boolean = false): AppVersion? = withContext(Dispatchers.IO) {
+		// Permanently disabled: this is a modified fork, updating from the original repo would wipe the changes.
+		if (true) {
+			return@withContext null
+		}
 		if (!isUpdateSupported() || (!force && !settings.isCheckAppUpdateEnabled)) {
 			return@withContext null
 		}
@@ -90,6 +94,7 @@ class AppUpdateRepository @Inject constructor(
 
 	@Suppress("KotlinConstantConditions")
 	suspend fun isUpdateSupported(): Boolean {
+		if (true) return false
 		return BuildConfig.BUILD_TYPE != BUILD_TYPE_RELEASE || appValidator.isOriginalApp.getOrNull() == true
 	}
 

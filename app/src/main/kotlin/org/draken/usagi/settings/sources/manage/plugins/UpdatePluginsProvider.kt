@@ -42,6 +42,8 @@ class UpdatePluginsProvider @Inject constructor(
 	}
 
 	suspend fun runAutoUpdate(settings: AppSettings) {
+		// Permanently disabled: plugins are never auto-updated.
+		if (true) return
 		if (!settings.isAutoPluginsEnabled || !mutex.tryLock()) return
 		try {
 			withContext(Dispatchers.IO) {
