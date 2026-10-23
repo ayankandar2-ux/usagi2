@@ -38,6 +38,12 @@ android {
 	buildTypes {
 		debug {
 			applicationIdSuffix = '.debug'
+			// Optimized build: debuggable apps run much slower (no R8 optimization or shrinking).
+			// Same package as before, so it still installs over the current app.
+			debuggable = false
+			minifyEnabled true
+			shrinkResources true
+			proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 		}
 		release {
 			minifyEnabled true
