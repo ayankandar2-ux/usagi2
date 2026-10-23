@@ -14,7 +14,7 @@ import com.alix.tsuki.core.BaseApp
 class UsagiApp : BaseApp() {
 
 	var isLeakCanaryEnabled: Boolean
-		get() = getDebugPreferences(this).getBoolean(KEY_LEAK_CANARY, true)
+		get() = getDebugPreferences(this).getBoolean(KEY_LEAK_CANARY, false)
 		set(value) {
 			getDebugPreferences(this).edit { putBoolean(KEY_LEAK_CANARY, value) }
 			configureLeakCanary()
